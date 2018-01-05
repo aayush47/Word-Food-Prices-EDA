@@ -1,0 +1,66 @@
+---
+title: "World Market Food Prices"
+author: "Aayush Srivastava"
+date: "January 5, 2018"
+output: html_document
+---
+
+```{r}
+library(tidyquant, quietly = T)
+```
+
+```{r}
+# Importing file
+df <- read_csv("D:/Personal Projects/World Food Market prices/wfp_market_food_prices.csv")
+```
+
+```{r}
+#Seeing through the first 5 observations
+df %>% head(5)
+```
+
+```{r}
+#Finding how many different countries are there
+df['adm0_name'] %>% unique() %>% count()
+```
+```{r}
+#Selecting relevant fields for EDA on Zambia Food Prices
+Zambia_Food_Prices <- df %>% filter(adm0_name == 'Zambia') %>% select(country = adm0_name, market = mkt_name, food_type = cm_name,  month = mp_month, year = mp_year, price = mp_price)
+Zambia_Food_Prices %>% head(5)
+```
+
+```{r}
+#Different types of markets
+Zambia_Food_Prices['market'] %>% unique() %>% count()
+
+#Different types of food items
+Zambia_Food_Prices['food_type'] %>% unique() %>% count()
+```
+```{r}
+#Total Number of different food items sold on all occassions
+Zambia_Food_Prices %>% count(food_type)
+```
+```{r}
+#Mean price of every food item
+Zambia_Food_Prices %>% group_by(food_type) %>% summarise(mean(price))
+
+#Mean price of every food item in different markets
+Zambia_Food_Prices %>% group_by(market, food_type) %>% summarise(mean(price))
+```
+```{r}
+#Mean price per year
+Zambia_Food_Prices %>% group_by(year,food_type) %>% summarise(mean(price))
+#Mean price per month
+Zambia_Food_Prices %>% group_by(month,food_type) %>% summarise(mean(price))
+#Mean price per year per month
+Zambia_Food_Prices %>% group_by(year,month,food_type) %>% summarise(mean(price))
+```
+```{r}
+#Findina the trend of mean food price per food item over the years
+Zambia_Food_Prices %>% group_by(year, food_type) %>% summarise(mean_price = mean(price)) %>%
+  ggplot(aes(x=year, y=mean_price)) +
+  geom_line(size = 1.0, color = "blue") +
+  geom_point(size = 2.0, color = "blue") +
+  facet_wrap(~ food_type, ncol = 4, scales = "free") +
+  theme(axis.text.x = element_text(size = 5.0))
+```
